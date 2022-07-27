@@ -23,4 +23,15 @@ app.get("/", (req, res) => {
         });
 });
 
+// get data user by id
+app.get("/:id", (req, res) => {
+    user.findByPk(req.params.id)
+        .then((data) => {
+            res.send(data);
+        })
+        .catch((err) => {
+            res.send(err);
+        });
+});
+
 module.exports = app;
