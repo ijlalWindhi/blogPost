@@ -31,7 +31,7 @@ module.exports = (sequelize, DataTypes) => {
             sequelize,
             modelName: "post_comments",
             tableName: "post_comments",
-            timeStamps: false,
+            timestamps: false,
         }
     );
     return post_comments;
