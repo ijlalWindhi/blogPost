@@ -25,5 +25,5 @@ app.use("/comments", comments);
 
 //run server
 app.listen(PORT, () => {
-    console.log("server run on PORT " + port);
+    console.log("server run on PORT " + PORT);
 });
