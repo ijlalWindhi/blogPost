@@ -2,6 +2,7 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const bcrypt = require("bcrypt");
+const { Op } = require("sequelize");
 
 //implementasi library
 const app = express();
@@ -28,9 +29,10 @@ const storage = multer.diskStorage({
 });
 let upload = multer({ storage: storage });
 
-// get all data user
+// get all data
 app.get("/", async (req, res) => {
-    user.findAll()
+    await user
+        .findAll()
         .then((result) => {
             res.status(200).json({
                 status: "success",
@@ -45,9 +47,10 @@ app.get("/", async (req, res) => {
         });
 });
 
-// get data user by id
+// get data by id
 app.get("/:id", async (req, res) => {
-    user.findByPk(req.params.id)
+    await user
+        .findByPk(req.params.id)
         .then((result) => {
             res.status(200).json({
                 status: "success",
@@ -62,9 +65,9 @@ app.get("/:id", async (req, res) => {
         });
 });
 
-// insert data user
+// register
 app.post("/register", upload.single("profile"), async (req, res) => {
-    user.create({
+    const data = {
         name: req.body.name,
         username: req.body.username,
         password: bcrypt.hashSync(req.body.password, 10),
@@ -74,23 +77,78 @@ app.post("/register", upload.single("profile"), async (req, res) => {
         website: req.body.website,
         status: req.body.status,
         profile: "userProfile.svg",
-        // profile: req.file.filename,
-    })
-        .then((result) => {
-            res.status(200).json({
-                status: "success",
-                message: "user has been added",
-            });
+        resultArr: {},
+    };
+    await user
+        .findAll({
+            where: {
+                [Op.or]: [{ email: data.email }, { username: data.username }],
+            },
         })
-        .catch((err) => {
-            res.status(400).json({
-                status: "error",
-                message: err.message,
-            });
+        .then((result) => {
+            resultArr = result;
+            if (resultArr.length > 0) {
+                if (resultArr[0].email == data.email) {
+                    res.status(400).json({
+                        status: "error",
+                        message: "email already exist",
+                    });
+                } else {
+                    res.status(400).json({
+                        status: "error",
+                        message: "username already exist",
+                    });
+                }
+            } else {
+                user.create(data)
+                    .then((result) => {
+                        res.status(200).json({
+                            status: "success",
+                            message: "user has been add",
+                        });
+                    })
+                    .catch((error) => {
+                        res.status(400).json({
+                            status: "error",
+                            message: error.message,
+                        });
+                    });
+            }
         });
 });
 
-// delete data user
+// login
+app.post("/login", async (req, res) => {
+    const data = await user.findOne({ where: { username: req.body.username } });
+
+    if (data) {
+        const validPassword = await bcrypt.compare(
+            req.body.password,
+            data.password
+        );
+        if (validPassword) {
+            res.status(200).json({
+                status: "success",
+                logged: true,
+                message: "valid password",
+                data: data,
+            });
+        } else {
+            res.status(400).json({
+                status: "error",
+                logged: false,
+                message: "invalid Password",
+            });
+        }
+    } else {
+        res.status(400).json({
+            status: "error",
+            message: "user does not exist",
+        });
+    }
+});
+
+// delete data
 app.delete("/delete/:id", async (req, res) => {
     let param = {
         id: req.params.id,
@@ -100,7 +158,7 @@ app.delete("/delete/:id", async (req, res) => {
         let oldFileName = result.profile;
         // delete old file
         let dir = path.join(__dirname, "../public/image/profile/", oldFileName);
-        fs.unlink(dir, (err) => err);
+        fs.unlink(dir, (error) => error);
     }
 
     // delete data
@@ -117,6 +175,74 @@ app.delete("/delete/:id", async (req, res) => {
                 message: error.message,
             });
         });
+});
+
+// edit data
+app.put("/edit/:id", upload.single("profile"), async (req, res) => {
+    let param = { id: req.params.id };
+    const data = {
+        name: req.body.name,
+        username: req.body.username,
+        password: req.body.password,
+        role: req.body.role,
+        location: req.body.location,
+        website: req.body.website,
+        status: req.body.status,
+        resultArr: {},
+    };
+
+    // check if password is empty
+    if (data.password) {
+        const salt = await bcrypt.genSalt(10);
+        data.password = await bcrypt.hash(data.password, salt);
+    }
+
+    // check if image is empty
+    if (req.file) {
+        // get data by id
+        user.findOne({ where: param }).then((result) => {
+            let oldFileName = result.profile;
+            // delete old file
+            if (oldFileName != "userProfile.svg") {
+                let dir = path.join(
+                    __dirname,
+                    "../public/image/profile/",
+                    oldFileName
+                );
+                fs.unlink(dir, (err) => err);
+            }
+        });
+        // set new filename
+        data.profile = req.file.filename;
+    }
+
+    user.findAll({
+        where: {
+            username: data.username,
+        },
+    }).then((result) => {
+        resultArr = result;
+        if (resultArr.length > 0) {
+            res.status(400).json({
+                status: "error",
+                message: "username already exist",
+            });
+        } else {
+            user.update(data, { where: param })
+                .then((result) => {
+                    res.status(200).json({
+                        status: "success",
+                        message: "User has been updated",
+                    });
+                })
+                .catch((error) => {
+                    res.status(400).json({
+                        status: "error",
+                        message: error.message,
+                    });
+                });
+        }
+    });
 });
 
 module.exports = app;
