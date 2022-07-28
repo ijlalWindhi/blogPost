@@ -40,6 +40,10 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
+            role: {
+                type: Sequelize.ENUM("user", "admin"),
+                allowNull: false,
+            },
         });
     },
     async down(queryInterface, Sequelize) {
