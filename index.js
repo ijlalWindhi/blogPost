@@ -1,7 +1,7 @@
 //import
 const express = require("express");
 const cors = require("cors");
-const port = 2004;
+const PORT = process.env.PORT || 2004;
 
 //implementasi
 const app = express();
@@ -24,6 +24,6 @@ const comments = require("./routes/post_comment");
 app.use("/comments", comments);
 
 //run server
-app.listen(port, () => {
-    console.log("server run on port " + port);
+app.listen(PORT, () => {
+    console.log("server run on PORT " + port);
 });
