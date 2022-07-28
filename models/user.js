@@ -25,12 +25,13 @@ module.exports = (sequelize, DataTypes) => {
             location: DataTypes.STRING,
             status: DataTypes.STRING,
             website: DataTypes.STRING,
+            role: DataTypes.ENUM("user", "admin"),
         },
         {
             sequelize,
             modelName: "user",
             tableName: "user",
-            timeStamps: false,
+            timestamps: false,
         }
     );
     return user;

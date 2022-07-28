@@ -22,8 +22,8 @@ module.exports = (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: "post_category",
-            timestamps: false,
             tableName: "post_category",
+            timestamps: false,
         }
     );
     return post_category;
