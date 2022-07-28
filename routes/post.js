@@ -60,9 +60,10 @@ app.get("/", async (req, res) => {
 });
 
 // get data by id
-app.get("/:id", async (req, res) => {
+app.get("/:author", async (req, res) => {
+    let param = { author: req.params.author };
     await post
-        .findByPk(req.params.id)
+        .findAll({ where: param })
         .then((result) => {
             res.status(200).json({
                 status: "success",
