@@ -14,6 +14,9 @@ app.use("/user", user);
 const category = require("./routes/post_category");
 app.use("/category", category);
 
+const post = require("./routes/post");
+app.use("/post", post);
+
 //run server
 app.listen(port, () => {
     console.log("server run on port " + port);
