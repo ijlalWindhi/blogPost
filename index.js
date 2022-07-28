@@ -11,6 +11,9 @@ app.use(cors());
 const user = require("./routes/user");
 app.use("/user", user);
 
+const category = require("./routes/post_category");
+app.use("/category", category);
+
 //run server
 app.listen(port, () => {
     console.log("server run on port " + port);
