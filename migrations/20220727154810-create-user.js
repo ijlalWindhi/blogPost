@@ -30,15 +30,15 @@ module.exports = {
             },
             location: {
                 type: Sequelize.STRING,
-                allowNull: false,
+                // allowNull: false,
             },
             status: {
                 type: Sequelize.STRING,
-                allowNull: false,
+                // allowNull: false,
             },
             website: {
                 type: Sequelize.STRING,
-                allowNull: false,
+                // allowNull: false,
             },
             role: {
                 type: Sequelize.ENUM("user", "admin"),
