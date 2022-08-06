@@ -59,8 +59,42 @@ app.get("/", async (req, res) => {
         });
 });
 
-// get data by id
-app.get("/:author", async (req, res) => {
+// get data by id post
+app.get("/:id", async (req, res) => {
+    await post
+        .findOne({
+            where: {
+                id: req.params.id,
+            },
+            include: [
+                {
+                    model: model.user,
+                    as: "user",
+                    attributes: ["id", "name", "username", "email"],
+                },
+                {
+                    model: model.post_category,
+                    as: "post_category",
+                    attributes: ["id", "title"],
+                },
+            ],
+        })
+        .then((result) => {
+            res.status(200).json({
+                status: "success",
+                data: result,
+            });
+        })
+        .catch((error) => {
+            res.status(400).json({
+                status: "error",
+                message: error.message,
+            });
+        });
+});
+
+// get data by author
+app.get("/author/:author", async (req, res) => {
     let param = { author: req.params.author };
     await post
         .findAll({ where: param })
