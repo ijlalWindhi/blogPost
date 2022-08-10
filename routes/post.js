@@ -59,8 +59,42 @@ app.get("/", async (req, res) => {
         });
 });
 
-// get data by id
-app.get("/:author", async (req, res) => {
+// get data by id post
+app.get("/:id", async (req, res) => {
+    await post
+        .findOne({
+            where: {
+                id: req.params.id,
+            },
+            include: [
+                {
+                    model: model.user,
+                    as: "user",
+                    attributes: ["id", "name", "username", "email"],
+                },
+                {
+                    model: model.post_category,
+                    as: "post_category",
+                    attributes: ["id", "title"],
+                },
+            ],
+        })
+        .then((result) => {
+            res.status(200).json({
+                status: "success",
+                data: result,
+            });
+        })
+        .catch((error) => {
+            res.status(400).json({
+                status: "error",
+                message: error.message,
+            });
+        });
+});
+
+// get data by author
+app.get("/author/:author", async (req, res) => {
     let param = { author: req.params.author };
     await post
         .findAll({ where: param })
@@ -78,21 +112,20 @@ app.get("/:author", async (req, res) => {
         });
 });
 
-// add data
-app.post("/add", upload.single("poster"), async (req, res) => {
+// add detail post
+app.post("/add/detailPost", upload.single("poster"), async (req, res) => {
     const data = {
         author: req.body.author,
         title: req.body.title,
         description: req.body.description,
         category: req.body.category,
-        content: req.body.content,
         resultArr: {},
     };
 
     if (req.file) {
         data.poster = req.file.filename;
     } else {
-        data.poster = "defaultPoster.png";
+        data.poster = "defaultPoster.jpg";
     }
 
     await post
@@ -158,36 +191,19 @@ app.put("/edit/:id", upload.single("poster"), async (req, res) => {
         data.poster = req.file.filename;
     }
 
-    await post
-        .findAll({
-            where: {
-                [Op.or]: [{ title: data.title }],
-            },
-        })
+    await post;
+    post.update(data, { where: param })
         .then((result) => {
-            resultArr = result;
-            if (resultArr.length > 0) {
-                if (resultArr[0].title == data.title) {
-                    res.status(400).json({
-                        status: "error",
-                        message: "title already exist",
-                    });
-                }
-            } else {
-                post.update(data, { where: param })
-                    .then((result) => {
-                        res.status(200).json({
-                            status: "success",
-                            message: "post has been update",
-                        });
-                    })
-                    .catch((error) => {
-                        res.status(400).json({
-                            status: "error",
-                            message: error.message,
-                        });
-                    });
-            }
+            res.status(200).json({
+                status: "success",
+                message: "post has been update",
+            });
+        })
+        .catch((error) => {
+            res.status(400).json({
+                status: "error",
+                message: error.message,
+            });
         });
 });
 

@@ -73,9 +73,9 @@ app.post("/register", upload.single("profile"), async (req, res) => {
         password: bcrypt.hashSync(req.body.password, 10),
         email: req.body.email,
         role: req.body.role,
-        location: req.body.location,
-        website: req.body.website,
-        status: req.body.status,
+        location: "Indonesia",
+        website: "auvers.netlify.app",
+        status: "Alway Happy",
         profile: "userProfile.svg",
         resultArr: {},
     };
@@ -104,7 +104,7 @@ app.post("/register", upload.single("profile"), async (req, res) => {
                     .then((result) => {
                         res.status(200).json({
                             status: "success",
-                            message: "user has been add",
+                            message: "Success register",
                         });
                     })
                     .catch((error) => {
@@ -216,33 +216,35 @@ app.put("/edit/:id", upload.single("profile"), async (req, res) => {
         data.profile = req.file.filename;
     }
 
-    user.findAll({
-        where: {
-            username: data.username,
-        },
-    }).then((result) => {
-        resultArr = result;
-        if (resultArr.length > 0) {
-            res.status(400).json({
-                status: "error",
-                message: "username already exist",
-            });
-        } else {
-            user.update(data, { where: param })
-                .then((result) => {
-                    res.status(200).json({
-                        status: "success",
-                        message: "User has been updated",
-                    });
-                })
-                .catch((error) => {
-                    res.status(400).json({
-                        status: "error",
-                        message: error.message,
-                    });
+    if (data.username) {
+        user.findAll({
+            where: {
+                username: data.username,
+            },
+        }).then((result) => {
+            resultArr = result;
+            if (resultArr.length > 0) {
+                res.status(400).json({
+                    status: "error",
+                    message: "username already exist",
                 });
-        }
-    });
+            }
+        });
+    } else {
+        user.update(data, { where: param })
+            .then((result) => {
+                res.status(200).json({
+                    status: "success",
+                    message: "User has been updated",
+                });
+            })
+            .catch((error) => {
+                res.status(400).json({
+                    status: "error",
+                    message: error.message,
+                });
+            });
+    }
 });
 
 module.exports = app;
