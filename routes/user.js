@@ -73,9 +73,9 @@ app.post("/register", upload.single("profile"), async (req, res) => {
         password: bcrypt.hashSync(req.body.password, 10),
         email: req.body.email,
         role: req.body.role,
-        location: req.body.location,
-        website: req.body.website,
-        status: req.body.status,
+        location: "Indonesia",
+        website: "auvers.netlify.app",
+        status: "Alway Happy",
         profile: "userProfile.svg",
         resultArr: {},
     };
